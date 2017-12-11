@@ -303,7 +303,12 @@ class DefaultClient(object):
             client = self.get_client(write=True)
 
         try:
-            client.flushdb()
+            pattern = self.make_pattern("*")
+            count = 0
+            for key in client.scan_iter(pattern):
+                client.delete(key)
+                count += 1
+            return count
         except _main_exceptions as e:
             raise ConnectionInterrupted(connection=client, parent=e)
 
